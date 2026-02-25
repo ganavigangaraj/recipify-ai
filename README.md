@@ -1,250 +1,164 @@
-AI Recipe Generator
+**AI Recipe Generator** 
 
  A full-stack web application that generates personalized recipes based on ingredients provided by the user.
 
-This project demonstrates modern front-end development practices, clean backend architecture, AI integration, and unit testing. It reflects real-world production patterns including API design, prompt handling, error management, and structured data formatting.
+ This project demonstrates modern front-end development practices, clean backend architecture, AI integration, and unit testing. 
+ It reflects real-world production patterns including API design, prompt handling, error management, and structured data formatting.
 
-Project Overview
+**Project Overview** 
 
-The AI Recipe Generator allows users to:
+ The AI Recipe Generator allows users to: Enter available ingredients, Generate two unique recipes
 
-Enter available ingredients
+**View:**  Recipe name , Complete ingredient list , Preparation steps , Estimated prep time
 
-Generate two unique recipes
+The application leverages an Hugging face AI model to dynamically create structured recipe content while maintaining consistent formatting for frontend rendering.
 
-View:
+**Tech Stack** 
+**Frontend** :  React JS, Vite, Tailwind CSS
+** Backend** :  Node.js, Express.js
 
-Recipe name
+**Hugging Face Inference API**
+**Testing** : Jest (Unit testing for backend logic and formatting utilities)
 
-Complete ingredient list
-
-Preparation steps
-
-Estimated prep time
-
-The application leverages an AI model to dynamically create structured recipe content while maintaining consistent formatting for frontend rendering.
-
-Tech Stack
-Frontend
-
-React JS
-
-Vite
-
-Tailwind CSS
-
-Backend
-
-Node.js
-
-Express.js
-
-Hugging Face Inference API
-
-Testing
-
-Jest (Unit testing for backend logic and formatting utilities)
-
-📂 Architecture Overview
+**📂 Architecture Overview**
 
 The application follows a clean separation of concerns:
 
-Client (React)
-    ↓
-REST API (Express)
-    ↓
-AI Model (Hugging Face)
-    ↓
-Response Formatting Layer
-    ↓
-Frontend Rendering
+Client (React) -> REST API (Express) -> AI Model (Hugging Face) -> Response Formatting Layer -> Frontend Rendering
 
-Key Backend Responsibilities
+**Key Backend Responsibilities** 
+1. Accept ingredient input
+2. Construct structured AI prompt
+3. Call Hugging Face inference model
+4. Parse and format response
+5. Return consistent JSON output
 
-Accept ingredient input
+**Key Frontend Responsibilities**
+1. Handle user input
+2. Manage API calls
+3. Display structured recipe results
+4. Responsive UI design
 
-Construct structured AI prompt
+**✨ Features**
+1. Dynamic AI-based recipe generation
+2. Generates exactly two structured recipes
+3. Clean JSON response formatting
+4. Preparation time included
+5. Responsive and modern UI
+6. Error handling and fallback messaging
+7. Unit-tested formatting utilities
+8. Environment-based configuration
 
-Call Hugging Face inference model
-
-Parse and format response
-
-Return consistent JSON output
-
-Key Frontend Responsibilities
-
-Handle user input
-
-Manage API calls
-
-Display structured recipe results
-
-Responsive UI design
-
-✨ Features
-
-Dynamic AI-based recipe generation
-
-Generates exactly two structured recipes
-
-Clean JSON response formatting
-
-Preparation time included
-
-Responsive and modern UI
-
-Error handling and fallback messaging
-
-Unit-tested formatting utilities
-
-Environment-based configuration
-
-🧠 AI Integration
+**🧠 AI Integration**
 
 The backend integrates with the Hugging Face Inference API to generate recipes using a structured prompt.
 
-The AI response is:
-
-Parsed
-
-Converted into structured JSON
-
-Validated
-
-Returned to the frontend
+**The AI response is:**
+1. Parsed
+2. Converted into structured JSON
+3. Validated
+4. Returned to the frontend
 
 This ensures predictable rendering and avoids fragile string-based UI parsing.
 
+**Testing Strategy**
 
-Testing Strategy
+Unit testing is implemented using **Jest.**
 
-Unit testing is implemented using Jest.
+**Test coverage includes:**
+* Recipe parsing logic
+* Response formatting
+* Edge case handling
+* Error handling validation
 
-Test coverage includes:
+**Example test coverage areas:**
+* Valid AI response parsing
+* Empty response handling
+* Incorrect format handling
+* Structured output validation
 
-Recipe parsing logic
-
-Response formatting
-
-Edge case handling
-
-Error handling validation
-
-Example test coverage areas:
-
-Valid AI response parsing
-
-Empty response handling
-
-Incorrect format handling
-
-Structured output validation
-
-To run tests:
-
-npm test
+**To run tests:**  
+           
+           npm test
 
 
-🛠️ Installation & Setup
-1️⃣ Clone the repository
-git clone <your-repo-url>
-cd ai-recipe-generator
-2️⃣ Backend Setup
-cd server
-npm install
+**🛠️ Installation & Setup**
 
-Create a .env file:
+1️⃣ **Clone the repository**:
+     
+     git clone https://github.com/ganavigangaraj0910-jpg/recipify-ai.git 
+     cd ai-recipe-generator
 
-PORT=5000
-HUGGING_FACE_API_KEY=your_api_key_here
+2️⃣ **Backend Setup** : 
+     
+     cd server
+     npm install
 
-Run the backend:
+**Create a .env file:**
 
-npm run dev
-3️⃣ Frontend Setup
-cd client
-npm install
-npm run dev
+    PORT=5000
+    HUGGING_FACE_API_KEY=your_api_key_here
 
-The app will run on:
+Run the backend:  
+      
+      npm run dev
 
-http://localhost:5173
+3️⃣ **Frontend Setup**
+      
+    cd client 
+    npm install
+    npm run dev
+
+**The app will run on:**  http://localhost:5173
+
 📡 API Endpoint
-POST /api/recipes
-Request Body
-{
-  "ingredients": "chicken, tomato, garlic"
-}
-Response Format
-{
-  "recipes": [
+    
+    POST /api/recipes
+
+    Request Body
     {
-      "title": "Recipe Name",
-      "ingredients": ["ingredient 1", "ingredient 2"],
-      "instructions": ["step 1", "step 2"],
-      "prepTime": "30 minutes"
-    },
-    {
-      "title": "Recipe Name",
-      "ingredients": ["ingredient 1", "ingredient 2"],
-      "instructions": ["step 1", "step 2"],
-      "prepTime": "25 minutes"
+    "ingredients": "chicken, tomato, garlic"
     }
-  ]
-}
-🎨 UI Design Approach
+    Response Format
+    {
+      "recipes": [
+        {
+          "title": "Recipe Name",
+          "ingredients": ["ingredient 1", "ingredient 2"],
+          "instructions": ["step 1", "step 2"],
+          "prepTime": "30 minutes"
+        },
+        {
+          "title": "Recipe Name",
+          "ingredients": ["ingredient 1", "ingredient 2"],
+          "instructions": ["step 1", "step 2"],
+          "prepTime": "25 minutes"
+        }
+      ]
+    }
 
-Built with Tailwind CSS for rapid, scalable styling
 
-Mobile-first responsive design
+**🎨 UI Design Approach** 
+*  Built with Tailwind CSS for rapid, scalable styling
+*  Mobile-first responsive design
+*  Clean layout with visual hierarchy
+*  Accessible form controls
+*  Conditional rendering for loading & error states
 
-Clean layout with visual hierarchy
+**🔒 Environment & Security**
+* API keys stored in environment variables
+* No secrets exposed to the frontend
+* Structured error handling
+* Defensive parsing of AI responses
 
-Accessible form controls
 
-Conditional rendering for loading & error states
+**🔮 Future Improvements** 
+* Add user authentication
+* Save generated recipes to a database
+* Add recipe rating system
+* Deploy
+* Improve AI prompt tuning for richer outputs
+* Add integration tests
 
-🔒 Environment & Security
-
-API keys stored in environment variables
-
-No secrets exposed to the frontend
-
-Structured error handling
-
-Defensive parsing of AI responses
-
-📈 Why This Project Matters
-
-This project demonstrates:
-
-Full-stack development capability
-
-AI API integration
-
-Clean architecture principles
-
-Production-style API response formatting
-
-Defensive coding practices
-
-Unit testing discipline
-
-Modern React development patterns
-
-It reflects practical, real-world implementation rather than tutorial-level experimentation.
-
-🔮 Future Improvements
-
-Add user authentication
-
-Save generated recipes to a database
-
-Add recipe rating system
-
-Deploy using Docker
-
-Improve AI prompt tuning for richer outputs
-
-Add integration tests
+  
 
