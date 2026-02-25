@@ -14,11 +14,16 @@
 The application leverages an Hugging face AI model to dynamically create structured recipe content while maintaining consistent formatting for frontend rendering.
 
 **Tech Stack** 
-**Frontend** :  React JS, Vite, Tailwind CSS
-** Backend** :  Node.js, Express.js
+1. **Frontend** :  
+   - React JS
+   - Vite
+   - Tailwind CSS
+2. **Backend** :
+   - Node.js
+   - Express.js
 
-**Hugging Face Inference API**
-**Testing** : Jest (Unit testing for backend logic and formatting utilities)
+3. **Hugging Face Inference API**
+4. **Testing** : Jest (Unit testing for backend logic and formatting utilities)
 
 **📂 Architecture Overview**
 
