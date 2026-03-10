@@ -1,51 +1,41 @@
-import { useEffect, useState,useRef } from "react"
+import {  useState,useRef } from "react"
 import IngredientComponent from '../components/IngredientComponent/IngredientComponent'
+import { fetchRecipes } from "../services/recipeService"
+
 export default function HomeComponent() {
     const buttonText = "Add Ingredient"
-    const [ingredients,setIngredients] = useState([])
-
-
-      function addIngredients(formData){
-        formData.preventDefault()
+    const [ingredients, setIngredients] = useState([]);
+    const [recipe, setRecipe] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
+   
+    const recipeSection = useRef(null)
+    
+    function addIngredients(formData){
+        // formData.preventDefault()
         const newIngredient = formData.get('ingredient')
       setIngredients(prevIngredients => [...prevIngredients, newIngredient])
      }
 
-    const [recipe, setRecipe] = useState("")
-    const recipeSection = useRef(null)
- 
-      const [message, setMessage] = useState('');
-     useEffect(() => {
-            fetch('/api/data') // This will be proxied to http://localhost:5000/api/data
-                .then(response => response.json())
-                .then(data => setMessage(data.message))
-                .catch(error => console.error('Error fetching data:', error));
-        }, []);
-    
-    const [isLoading, setIsLoading] = useState(false)
-    const [error ,setError] = useState(null)
-    const [generatedRecipe, setGeneratedRecipe] = useState('');
-
     async function getRecipe() {
         console.log("RECIPE CLICK")
+        if (isLoading) return // prevent multiple clicks while loading
         setIsLoading(true)
         setError(null) // clear previous error
         try {
-            const recipeResponse = await fetch('/api/getRecipe',{
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ingredients})
-            });
-          
-            const responseData = await recipeResponse.json();
-            setGeneratedRecipe(responseData)
-        } catch (error) {
-            setError(error.message)
-            
-        }
-        setIsLoading(false)
+            const recipeResponse = await fetchRecipes(ingredients)
+            console.log("RECIPE RESPONSE", recipeResponse)
+            setRecipe(recipeResponse)
+             // Scroll to the recipe section after setting the recipe
+             if (recipeSection.current) {
+                recipeSection.current.scrollIntoView({ behavior: 'smooth' });
+              } 
+            } catch (error) {
+              console.error("Recipe fetch failed:", error.message);
+              setError(error.message)
+            } finally {
+                    setIsLoading(false)
+            }
     }
 
     return (
@@ -73,11 +63,11 @@ export default function HomeComponent() {
               ingredients={ingredients}
               getRecipe={getRecipe}
               loading={isLoading}
-              error={error}
+              error={error}          
+//              recipes={recipes} 
             />
           )}
         </main>
-        {message}
       </>
     );
 }
