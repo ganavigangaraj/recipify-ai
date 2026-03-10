@@ -1,11 +1,13 @@
 import {  useState,useRef } from "react"
 import IngredientComponent from '../components/IngredientComponent/IngredientComponent'
+import RecipeComponent from '../components/RecipeComponent/RecipeComponent'
+import './HomeComponent.css'
 import { fetchRecipes } from "../services/recipeService"
 
 export default function HomeComponent() {
     const buttonText = "Add Ingredient"
     const [ingredients, setIngredients] = useState([]);
-    const [recipe, setRecipe] = useState("");
+    const [recipe, setRecipe] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
    
@@ -18,13 +20,12 @@ export default function HomeComponent() {
      }
 
     async function getRecipe() {
-        console.log("RECIPE CLICK")
         if (isLoading) return // prevent multiple clicks while loading
         setIsLoading(true)
         setError(null) // clear previous error
         try {
             const recipeResponse = await fetchRecipes(ingredients)
-            console.log("RECIPE RESPONSE", recipeResponse)
+            // console.log("RECIPE RESPONSE", recipeResponse)
             setRecipe(recipeResponse)
              // Scroll to the recipe section after setting the recipe
              if (recipeSection.current) {
@@ -40,7 +41,7 @@ export default function HomeComponent() {
 
     return (
       <>
-        <main className='p-4 font-mono'>
+        <main className='p-4 font-mono bg-black min-h-screen'>
           <form
             className='flex flex-wrap justify-center gap-4'
             action={addIngredients}
@@ -67,6 +68,12 @@ export default function HomeComponent() {
 //              recipes={recipes} 
             />
           )}
+          {/* rendering the recipe component only if there is a recipe to show */}
+          <div className="recipe-card"> 
+           {recipe.map((recipeItem, index) => (
+            <RecipeComponent key={index} recipe={recipeItem} />
+           ))}
+          </div>
         </main>
       </>
     );

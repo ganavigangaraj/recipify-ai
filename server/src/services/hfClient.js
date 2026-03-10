@@ -6,7 +6,7 @@ dotenv.config();
 // const USED_MODEL = import.meta.env.USED_MODEL;
 export async function getRecipeFromMistral(ingredientsArray) {
   
-const HF_KEY = process.env.HF_ACCESS_TOKEN ; 
+const HF_KEY = process.env.HF_ACCESS_TOKEN ; // 👈 DEFAULT VALUE ADDED HERE
 
 const client = new InferenceClient(HF_KEY);
 
@@ -14,12 +14,12 @@ const SYSTEM_PROMPT = process.env.SYSTEM_PROMPT || 'Generate recipes using the p
 
 const USER_PROMPT = process.env.USER_PROMPT
 
-const USED_MODEL = process.env.USED_MODEL;
+const USED_MODEL = process.env.USED_MODEL 
   const ingredients = ingredientsArray.join(", ");
   try {
     const chatCompletion = await client.chatCompletion({
     provider: "together",
-    model: USED_MODEL,
+    model:"Qwen/Qwen2.5-7B-Instruct",
      messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: `I have ${ingredients} ${USER_PROMPT}` },
@@ -28,9 +28,8 @@ const USED_MODEL = process.env.USED_MODEL;
       max_tokens: 2048,
 });
 return chatCompletion.choices[0].message.content;
-
   } catch (error) {
-    console.log("Error from Hugging Face Model", error)
+    console.log("error from the Hugging face model", error)
     throw error; 
   }
 }
