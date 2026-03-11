@@ -1,112 +1,98 @@
+const REGEX = {
+  recipeHeaderMakrkdown : /###\s+Recipe\s+\d+:\s*/i,
+  recipeHeaderPlain : /^Recipe \d+:\s*/im,
+  recipeHeaderGeneric : /###\s+\d+\.\s+/,
+  title: /^\s*([^\n]+?)\s*(?:\(([^)]+)\))?\s*$/m,
+  cuisine: /(?:\*\*)?Cuisine:(?:\*\*)?\s*(.+?)(?:\n|$)/i,
+  style: /(?:[-\s]*\*\*)?Style:(?:\*\*)?\s*(.+?)(?:\n|$)/i,
+  prepTime: /(?:[-\s]*\*\*)?Prep\s*Time:(?:\*\*)?\s*(.+?)(?:\n|$)/i,
+  ingredientsBlock: /[-\s]*\*\*Ingredients?:\*\*\s*\n([\s\S]*?)(?=\n\s*(?:-\s*)?(?:\*\*|####?\s*)Instructions?:|$)/i,
+  instructionsBlock: /[-\s]*\*\*Instructions?:\*\*\s*\n([\s\S]*?)(?=\n\s*###|$)/i
+}
+
 export async function formatRecipe(aiResponse) {
-    // console.log("aiResponse", aiResponse)
-
-  const recipeData = aiResponse  // aiResponse is already a string from hfClient, no need for .text() or .json() parsing
-
-  const parsedRecipes = parseRecipes(recipeData)
-  // console.log("parsedRecipes", parsedRecipes)
-
+  const recipeData = aiResponse
+  const parsedRecipes = parseRecipes(recipeData)  
   if (parsedRecipes.length === 0) {
     throw new Error("No valid recipes found in the response.")
-  }
-
+  } 
   return formatRecipeResponse(parsedRecipes)
 }
 
 export function parseRecipes(rawContent) {
-  if (!rawContent || typeof rawContent !== 'string') return []
-
+  if (!rawContent || typeof rawContent !== 'string') return []  
   let recipeSections = []
 
-  //   1: Check SPECIFIC format first — "### Recipe N:"
-  if (rawContent.match(/###\s+Recipe\s+\d+:/i)) {
-    recipeSections = rawContent
-      .split(/###\s+Recipe\s+\d+:\s*/i)
-      .filter(s => s.trim())
-      .slice(1)                    // skip intro text like "Sure, here are..."
-
-  // Plain "Recipe N:" on its own line
-  } else if (rawContent.match(/^Recipe \d+:/im)) {
-    recipeSections = rawContent
-      .split(/^Recipe \d+:\s*/im)
-      .filter(s => s.trim())
-      .slice(1)
-
-  // "### N." numbered markdown format
-  } else if (rawContent.includes('###')) {
-    recipeSections = rawContent
-      .split(/###\s+\d+\.\s+/)
-      .filter(s => s.trim())
-      .slice(1)
+  if(REGEX.recipeHeaderMakrkdown.test(rawContent)) {
+    recipeSections = rawContent.split(REGEX.recipeHeaderMakrkdown).filter(s => s.trim())
+  } else if(REGEX.recipeHeaderPlain.test(rawContent)) {
+    recipeSections = rawContent.split(REGEX.recipeHeaderPlain).filter(s => s.trim())
+  } else if(rawContent.includes('###')) {
+    recipeSections = rawContent.split(REGEX.recipeHeaderGeneric).filter(s => s.trim())
   }
+  return recipeSections.map(parseRecipeSection).filter(r => r.title && r.ingredients.length > 0 && r.instructions.length > 0)
+}
 
-  return recipeSections.map((section, i) => {
 
-    const lines = section.split('\n').filter(l => l.trim())
-    const titleRaw = lines[0].replace(/\*+/g, '').trim()
+  function parseRecipeSection(section, index) {
+    const lines    = section.split('\n').filter(l => l.trim()).filter(Boolean)
+    const titleRaw = lines[0].replace(/\*+/g, '').trim() || "Recipe"
+    const cuisineInTitle = titleRaw.match(REGEX.title)?.[2]?.replace(/cuisine/i, '').trim()
+    const title   = titleRaw.replace(/\([^)]*\)/, '').trim()
+    const cuisine = extract(REGEX.cuisine, section) || cuisineInTitle || 'International'
+    const style   = extract(REGEX.style, section) || 'Not specified'
+    const prepTime = extract(REGEX.prepTime, section) || 'Not specified'
+    const ingredients = extractBlock(REGEX.ingredientsBlock, section).map(cleanIngredient)
+    const instructions = extractBlock(REGEX.instructionsBlock, section).map(cleanInstruction).filter(validInstruction)
+ 
+   return {
+      id: index + 1,
+      title,
+      cuisine,
+      style,
+      prepTime,
+      ingredients,
+      instructions
+    }
+  
+}   
+   
+// helper functions
+function extract(regex, text) {
+  const match = text.match(regex)
+  return match ? match[1].trim() : null
+}
 
-    //   2: Extract cuisine from title "(Chinese Cuisine)" OR dedicated line
-    const cuisineInTitle = titleRaw.match(/\(([^)]+)\)/)?.[1]
-                             ?.replace(/cuisine/i, '').trim()
-    const title = titleRaw.replace(/\([^)]*\)/,'').trim()
+function extractBlock(regex, text) {
+  const block = text.match(regex)?.[1]
+  return block ? block.split('\n').map(l => l.trim()).filter(l => l.length > 0) : []
+}
 
-    const cuisineLine = section
-      .match(/(?:\*\*)?Cuisine:(?:\*\*)?\s*(.+?)(?:\n|$)/i)?.[1]?.trim()
-    const cuisine = cuisineLine || cuisineInTitle || 'International'
+function cleanIngredient(line) {
+  return line.replace(/^[-*\s]+/, '').replace(/\*+/g, '').trim()
+}
 
-    const style = section
-      .match(/(?:\*\*)?Style:(?:\*\*)?\s*(.+?)(?:\n|$)/i)?.[1]?.trim()
-      || 'Not specified'
+function cleanInstruction(line) {
+  return line.replace(/^\s*\d+\.\s*/, '').replace(/\*\*[^*]+\*\*:?\s*/g, '').trim()
+}
 
-    const prepTime = section
-      .match(/(?:\*\*)?Prep\s*Time:(?:\*\*)?\s*(.+?)(?:\n|$)/i)?.[1]?.trim()
-      || 'Not specified'
-
-    //   3: Regex handles **Ingredients:** AND #### Ingredients:
-    const ingBlock = section.match(
-      /(?:\*\*|####?\s*)Ingredients?:(?:\*\*)?\s*\n([\s\S]*?)(?=\n\s*(?:\*\*|####?\s*)Instructions?:|$)/i
-    )?.[1]
-    const ingredients = ingBlock
-      ? ingBlock.split('\n')
-          .map(l => l.replace(/^[-*\s]+/, '').replace(/\*+/g, '').trim())
-          .filter(l => l.length > 0)
-      : []
-
-    //   3: Regex handles **Instructions:** AND #### Instructions:
-    const instBlock = section.match(
-      /(?:\*\*|####?\s*)Instructions?:(?:\*\*)?\s*\n([\s\S]*?)(?=\n\s*###|$)/i
-    )?.[1]
-    const instructions = instBlock
-      ? instBlock.split('\n')
-          .map(l => l
-            .replace(/^\d+\.\s*/, '')
-            .replace(/\*\*[^*]+\*\*:?\s*/g, '')
-            .trim()
-          )
-          .filter(l => {
-            const c = l.toLowerCase()
-            return l.length > 0 &&
-              !c.includes('enjoy your cooking') &&
-              !c.includes('bon appétit') &&
-              !c.includes('enjoy your delicious')
-          })
-      : []
-
-    return { id: i + 1, title, cuisine, style, prepTime, ingredients, instructions }
-
-  //  cuisine removed from required fields — only need title + ingredients + instructions
-  }).filter(r => r.title && r.ingredients.length > 0 && r.instructions.length > 0)
+function validInstruction(line) {
+  const lower = line.toLowerCase()
+  return (line.length > 0 &&
+    !lower.includes('enjoy your cooking') &&
+    !lower.includes('bon appétit') &&
+    !lower.includes('enjoy your delicious'))
 }
 
 export function formatRecipeResponse(recipes) {
   return {
-    success: true,
+    success: true,  
     count: recipes.length,
     data: recipes.map((recipe, index) => ({
       id: index + 1,
       title: recipe.title,
       cuisine: recipe.cuisine,
-      style: recipe.style,
+      style: recipe.style,  
       prepTime: recipe.prepTime,
       ingredients: recipe.ingredients,
       instructions: recipe.instructions

@@ -1,4 +1,6 @@
+import 'dotenv/config'  
 import app from './index.js'
+
 const PORT = process.env.PORT || 4000;
 // Only start server if not in test environment
 if (process.env.NODE_ENV !== 'test') {

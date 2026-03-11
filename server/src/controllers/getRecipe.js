@@ -11,11 +11,8 @@ export async function getRecipe(req, res) {
     const aiResponse = await getRecipeFromMistral(ingredients)
     console.log("AI RESPONSE", aiResponse);
     const recipeData =  await formatRecipe(aiResponse)
-    // return res.status(200).json({
-    //   success: true,
-    //   recipe:recipeData, 
-    // });
-// ✅ AFTER — just send recipeData directly
+     console.log("AI RESPONSE formatted ", recipeData);
+    // send recipeData directly
 return res.status(200).json(recipeData);
   } catch (err) {
     console.error("Error in getRecipe:", err);
